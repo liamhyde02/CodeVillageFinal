@@ -5,5 +5,5 @@ import java.util.ArrayList;
 import java.io.IOException;
 
 public interface Parser {
-  public ArrayList<JavaEntity> parseSourceFiles(File directory) throws IOException;
+  public ArrayList<JavaEntity> parseSourceFiles(ArrayList<File> files) throws IOException;
 }

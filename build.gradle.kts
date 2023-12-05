@@ -24,7 +24,8 @@ dependencies {
     implementation("org.apache.logging.log4j:log4j-core:2.14.1")
     testImplementation(platform("org.junit:junit-bom:5.9.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-
+    implementation("org.json:json:20210307")
+    implementation("org.kohsuke:github-api:1.123")
     annotationProcessor("org.projectlombok:lombok:1.18.28")
 }
 

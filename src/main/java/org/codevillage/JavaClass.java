@@ -47,4 +47,7 @@ public abstract class JavaClass implements JavaEntity {
         return linesOfCode;
     }
     public abstract JavaEntityType getType();
+    public void setParent(String parent) {
+        this.parent = Optional.ofNullable(parent);
+    }
 }

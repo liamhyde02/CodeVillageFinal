@@ -1,5 +1,7 @@
 package org.codevillage;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public interface JavaEntity {
@@ -8,4 +10,5 @@ public interface JavaEntity {
     ArrayList<String> getDependencies();
     int getLinesOfCode();
     JavaEntityType getType();
+    JSONObject toJSON();
 }
