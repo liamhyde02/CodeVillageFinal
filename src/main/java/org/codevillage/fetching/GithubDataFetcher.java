@@ -1,32 +1,51 @@
 package org.codevillage.fetching;
-import org.eclipse.jgit.api.CloneCommand;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
+import org.kohsuke.github.*;
 
-import java.io.File;
-
+import java.io.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class GithubDataFetcher implements DataFetcher {
-    @Override
-    public void downloadPackage(String sourceUrl, String targetPath) {
-        // Create a temporary folder
-        final File tempFolder = new File(targetPath);
-        try {
-            // Create a Git clone command
-            CloneCommand cloneCommand = Git.cloneRepository()
-                    .setURI(sourceUrl)
-                    .setDirectory(tempFolder);
+    private static final String LAMBDA_TMP_DIR = "/tmp/";
+    private static String downloadDirectory = LAMBDA_TMP_DIR; // default to Lambda tmp directory
 
-            // Execute the clone command
-            Git git = cloneCommand.call();
-
-            // The repository has been successfully cloned into the target directory
-            System.out.println("Repository cloned to: " + targetPath);
-
-            // Clean up and close the Git object
-            git.close();
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
+    public ArrayList<File> downloadPackage(String repoUrl, boolean isLambdaEnvironment) throws IOException {
+        if (!isLambdaEnvironment) {
+            downloadDirectory = System.getProperty("user.dir") + File.separator + "downloaded_files"; // or any other directory
+            new File(downloadDirectory).mkdirs(); // create the directory if it doesn't exist
         }
+
+        GitHub github = new GitHubBuilder().build();
+        GHRepository repository = github.getRepository(repoUrl.substring(repoUrl.indexOf("github.com/") + 11));
+
+        ArrayList<File> javaFiles = new ArrayList<>();
+        processDirectory(repository, "", javaFiles);
+
+        return javaFiles;
+    }
+
+    private static void processDirectory(GHRepository repository, String path, ArrayList<File> javaFiles) throws IOException {
+        List<GHContent> contents = repository.getDirectoryContent(path);
+        for (GHContent content : contents) {
+            if (content.isDirectory()) {
+                processDirectory(repository, content.getPath(), javaFiles);
+            } else if (content.isFile() && content.getName().endsWith(".java")) {
+                File downloadedFile = downloadFile(new URL(content.getDownloadUrl()), content.getName());
+                javaFiles.add(downloadedFile);
+            }
+        }
+    }
+
+    private static File downloadFile(URL url, String fileName) throws IOException {
+        File file = new File(downloadDirectory + File.separator + fileName);
+        try (InputStream in = url.openStream(); FileOutputStream fos = new FileOutputStream(file)) {
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+        return file;
     }
 }

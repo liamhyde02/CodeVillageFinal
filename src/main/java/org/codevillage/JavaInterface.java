@@ -1,5 +1,7 @@
 package org.codevillage;
 
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class JavaInterface implements JavaEntity{
@@ -35,5 +37,14 @@ public class JavaInterface implements JavaEntity{
     @Override
     public JavaEntityType getType() {
         return JavaEntityType.JAVA_INTERFACE;
+    }
+    public JSONObject toJSON() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", this.getName());
+        jsonObject.put("fullyQualifiedName", this.getFullyQualifiedName());
+        jsonObject.put("linesOfCode", this.getLinesOfCode());
+        jsonObject.put("dependencies", this.getDependencies());
+        jsonObject.put("type", this.getType());
+        return jsonObject;
     }
 }
